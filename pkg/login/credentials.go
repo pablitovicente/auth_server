@@ -31,12 +31,12 @@ func (c *Credentials) Execute(dbp *pgxpool.Pool) (bool, db.User) {
 	row, err := dbp.Query(context.Background(), "SELECT id, username, groupid FROM users WHERE username = $1 AND password = $2", c.Username, c.Password)
 
 	if err != nil {
-		log.Error("failed to query DB", err)
+		log.Error("Failed to query DB:", err)
 	}
 	defer row.Close()
 
 	if row.Err() != nil {
-		log.Error("row has error", err)
+		log.Error("Can't read DB row error was: ", err)
 	}
 
 	if !row.Next() {
