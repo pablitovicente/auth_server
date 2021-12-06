@@ -22,6 +22,7 @@ type User struct {
 	GroupId          int
 	GroupName        string
 	GroupDescription string
+	JWT              string
 }
 
 func (dbp *Pool) Connect() {
