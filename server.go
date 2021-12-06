@@ -2,15 +2,13 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"net/http"
-	"os"
-	"time"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
+	"github.com/pablitovicente/auth_server/pkg/db"
 )
 
 type Login struct {
@@ -32,28 +30,13 @@ type dbUser struct {
 }
 
 func main() {
-	// HACK to wait for PG for quick POC
-	// this should be a propper reconnection strategy
-	time.Sleep(5 * time.Second)
-	fmt.Println("going to attempt db connection....")
-	// Setup DB Connection Pool
-	dbpool, err := pgxpool.Connect(context.Background(), "postgres://test:test1234@db:5432/auth_server")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		os.Exit(1)
+	db := db.Pool{
+		ConnString: "postgres://test:test1234@db:5432/auth_server",
 	}
-	defer dbpool.Close()
-	fmt.Println("connected to db")
 
-	// Create the "users" table.
-	if _, err := dbpool.Exec(context.Background(), "CREATE TABLE IF NOT EXISTS users ( id serial NOT NULL, PRIMARY KEY (id), username character varying(255) NOT NULL, password character varying(255) NOT NULL, groupid integer NOT NULL)"); err != nil {
-		log.Fatal(err)
-	}
-	// Insert some rows int users
-	if _, err := dbpool.Exec(context.Background(),
-		"INSERT INTO users (username, password, groupid) VALUES ('paul', 'testtest', 1963), ('george', 'testtest', 1963)"); err != nil {
-		log.Fatal(err)
-	}
+	db.Connect()
+	defer db.Pool.Close()
+	db.SeedDB()
 
 	// Echo instance
 	e := echo.New()
@@ -84,7 +67,7 @@ func main() {
 			isAdmin:  false,
 		}
 
-		loginOk, dbUser := loginUser(cleanLogin, dbpool)
+		loginOk, dbUser := loginUser(cleanLogin, db.Pool)
 
 		if loginOk {
 			c.Response().Header().Set("Authorization", "Bearer 12314")
