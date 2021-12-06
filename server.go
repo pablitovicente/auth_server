@@ -22,13 +22,6 @@ type sanitizedLogin struct {
 	isAdmin  bool
 }
 
-type dbUser struct {
-	Id       int
-	Username string
-	password string
-	GroupId  int
-}
-
 func main() {
 	db := db.Pool{
 		ConnString: "postgres://test:test1234@db:5432/auth_server",
@@ -73,15 +66,15 @@ func main() {
 			c.Response().Header().Set("Authorization", "Bearer 12314")
 			return c.JSON(http.StatusOK, dbUser)
 		}
-		return c.JSON(http.StatusUnauthorized, dbUser)
+		return c.JSON(http.StatusUnauthorized, "Invalid username or password!")
 	})
 
 	// Start server
 	e.Logger.Fatal(e.Start(":1323"))
 }
 
-func loginUser(credentials sanitizedLogin, db *pgxpool.Pool) (bool, dbUser) {
-	row, err := db.Query(context.Background(), "SELECT id, username, groupid FROM users WHERE username = $1 AND password = $2", credentials.Username, credentials.Password)
+func loginUser(credentials sanitizedLogin, dbp *pgxpool.Pool) (bool, db.User) {
+	row, err := dbp.Query(context.Background(), "SELECT id, username, groupid FROM users WHERE username = $1 AND password = $2", credentials.Username, credentials.Password)
 
 	if err != nil {
 		log.Error("failed to query DB", err)
@@ -94,11 +87,11 @@ func loginUser(credentials sanitizedLogin, db *pgxpool.Pool) (bool, dbUser) {
 
 	if !row.Next() {
 		log.Error("Login failed")
-		emptyUser := dbUser{}
+		emptyUser := db.User{}
 		return false, emptyUser
 	}
 
-	var found dbUser
+	var found db.User
 	row.Scan(&found.Id, &found.Username, &found.GroupId)
 
 	return true, found

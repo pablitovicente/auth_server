@@ -15,7 +15,7 @@ type Pool struct {
 	Pool       *pgxpool.Pool
 }
 
-type dbUser struct {
+type User struct {
 	Id       int
 	Username string
 	password string

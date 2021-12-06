@@ -2,8 +2,8 @@ version: '3'
 
 services:
   auth-server:
-    # build: .
-    image: auth_server:v1
+    build: .
+    # image: auth_server:v1
     ports:
       - 1323:1323
     depends_on:

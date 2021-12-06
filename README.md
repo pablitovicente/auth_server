@@ -6,7 +6,12 @@ Small example to get familiar with the Echo framework. Coded in 2 hours on a Sun
 
 - build the image `docker build . --no-cache -t auth_server:v1`
 - docker-compose up
-- test login works `curl --location --request POST 'localhost:1323/login' \ --header 'Content-Type: application/json' \ --data-raw '{ "username": "george", "password": "testtest" }'`
+
+or
+
+- docker-compose up --build
+
+Test login works `curl --location --request POST 'localhost:1323/login' \ --header 'Content-Type: application/json' \ --data-raw '{ "username": "george", "password": "testtest" }'`
 
 ## Benchmarks
 
