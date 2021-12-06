@@ -16,10 +16,12 @@ type Pool struct {
 }
 
 type User struct {
-	Id       int
-	Username string
-	password string
-	GroupId  int
+	Id               int
+	Username         string
+	password         string
+	GroupId          int
+	GroupName        string
+	GroupDescription string
 }
 
 func (dbp *Pool) Connect() {
@@ -39,12 +41,25 @@ func (dbp *Pool) Connect() {
 
 func (db *Pool) SeedDB() {
 	// Create the "users" table.
-	if _, err := db.Pool.Exec(context.Background(), "CREATE TABLE IF NOT EXISTS users ( id serial NOT NULL, PRIMARY KEY (id), username character varying(255) NOT NULL, password character varying(255) NOT NULL, groupid integer NOT NULL)"); err != nil {
+	sql := "CREATE TABLE IF NOT EXISTS users ( id serial NOT NULL, PRIMARY KEY (id), username character varying(255) NOT NULL, password character varying(255) NOT NULL, groupid integer NOT NULL)"
+	if _, err := db.Pool.Exec(context.Background(), sql); err != nil {
 		log.Fatal(err)
 	}
-	// Insert some rows int users
-	if _, err := db.Pool.Exec(context.Background(),
-		"INSERT INTO users (username, password, groupid) VALUES ('paul', 'testtest', 1963), ('george', 'testtest', 1963), ('john', 'liverpool', 1963), ('ringo', 'liverpool', 1963)"); err != nil {
+	// Create the "groups" table.
+	sql = "CREATE TABLE IF NOT EXISTS groups (id integer NOT NULL, name character varying(255) NOT NULL, enabled integer NOT NULL, description character varying(1024) NOT NULL)"
+	if _, err := db.Pool.Exec(context.Background(), sql); err != nil {
+		log.Fatal(err)
+	}
+
+	// Insert some rows into groups
+	sql = "INSERT INTO users (username, password, groupid) VALUES ('paul', 'testtest', 1963), ('george', 'testtest', 1963), ('john', 'liverpool', 1963), ('ringo', 'liverpool', 1963), ('greenwood', 'london', 1993)"
+	if _, err := db.Pool.Exec(context.Background(), sql); err != nil {
+		log.Fatal(err)
+	}
+
+	// Insert some rows into groups
+	sql = "INSERT INTO groups (id, name, enabled, description) VALUES (1963, 'The Beatles', 1, 'Greatest band ever'), (1993, 'Radiohead', 1, 'Greates alternative rock band ever')"
+	if _, err := db.Pool.Exec(context.Background(), sql); err != nil {
 		log.Fatal(err)
 	}
 }
