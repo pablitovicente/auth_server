@@ -8,6 +8,7 @@ COPY go.sum ./
 RUN go mod download
 
 COPY *.go ./
+COPY pkg ./pkg
 
 RUN export CGO_ENABLED=0 && go build -o /auth_server
 
