@@ -28,7 +28,8 @@ type sanitizedLogin struct {
 }
 
 func (c *Credentials) Execute(dbp *pgxpool.Pool) (bool, db.User) {
-	row, err := dbp.Query(context.Background(), "SELECT id, username, groupid FROM users WHERE username = $1 AND password = $2", c.Username, c.Password)
+	sql := "SELECT u.id, username, g.id AS gId, g.name, g.description FROM users u INNER JOIN groups g ON u.groupid = g.id WHERE username = $1 AND password = $2"
+	row, err := dbp.Query(context.Background(), sql, c.Username, c.Password)
 
 	if err != nil {
 		log.Error("Failed to query DB:", err)
@@ -46,7 +47,10 @@ func (c *Credentials) Execute(dbp *pgxpool.Pool) (bool, db.User) {
 	}
 
 	var found db.User
-	row.Scan(&found.Id, &found.Username, &found.GroupId)
+	err = row.Scan(&found.Id, &found.Username, &found.GroupId, &found.GroupName, &found.GroupDescription)
+	if err != nil {
+		log.Error("Error parsing authenticated user:", err)
+	}
 
 	return true, found
 }
