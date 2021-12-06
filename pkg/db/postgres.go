@@ -44,7 +44,7 @@ func (db *Pool) SeedDB() {
 	}
 	// Insert some rows int users
 	if _, err := db.Pool.Exec(context.Background(),
-		"INSERT INTO users (username, password, groupid) VALUES ('paul', 'testtest', 1963), ('george', 'testtest', 1963)"); err != nil {
+		"INSERT INTO users (username, password, groupid) VALUES ('paul', 'testtest', 1963), ('george', 'testtest', 1963), ('john', 'liverpool', 1963), ('ringo', 'liverpool', 1963)"); err != nil {
 		log.Fatal(err)
 	}
 }
