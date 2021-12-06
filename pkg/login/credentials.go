@@ -2,7 +2,9 @@ package login
 
 import (
 	"context"
+	"time"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/labstack/gommon/log"
 	"github.com/pablitovicente/auth_server/pkg/db"
@@ -11,6 +13,11 @@ import (
 type Credentials struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
+}
+
+type jwtCustomClaims struct {
+	User db.User
+	jwt.StandardClaims
 }
 
 // For security remap fields (for example imagine the target struct
@@ -50,6 +57,26 @@ func (c *Credentials) Execute(dbp *pgxpool.Pool) (bool, db.User) {
 	err = row.Scan(&found.Id, &found.Username, &found.GroupId, &found.GroupName, &found.GroupDescription)
 	if err != nil {
 		log.Error("Error parsing authenticated user:", err)
+	}
+
+	// Set custom claims
+	claims := &jwtCustomClaims{
+		found,
+		jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
+		},
+	}
+
+	// Create token with claims
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// Generate encoded token and send it as response.
+	t, err := token.SignedString([]byte("THIS_SECRET_SHOULD_BE_A_COMMAND_LINE_ARGUMENT_INJECTED_TO_THE_OWNER_STRUCT"))
+	found.JWT = t
+
+	if err != nil {
+		emptyUser := db.User{}
+		return false, emptyUser
 	}
 
 	return true, found

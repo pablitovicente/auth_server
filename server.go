@@ -43,7 +43,7 @@ func main() {
 		loginOk, dbUser := credentials.Execute(db.Pool)
 
 		if loginOk {
-			c.Response().Header().Set("Authorization", "Bearer 12314")
+			c.Response().Header().Set("Authorization", "Bearer "+dbUser.JWT)
 			return c.JSON(http.StatusOK, dbUser)
 		}
 		return c.JSON(http.StatusUnauthorized, "Invalid username or password!")
