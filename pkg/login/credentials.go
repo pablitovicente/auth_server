@@ -15,7 +15,7 @@ type Credentials struct {
 	Password string `json:"password"`
 }
 
-type jwtCustomClaims struct {
+type JwtCustomClaims struct {
 	User db.User
 	jwt.StandardClaims
 }
@@ -60,7 +60,7 @@ func (c *Credentials) Execute(dbp *pgxpool.Pool) (bool, db.User) {
 	}
 
 	// Set custom claims
-	claims := &jwtCustomClaims{
+	claims := &JwtCustomClaims{
 		found,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),

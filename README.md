@@ -11,14 +11,14 @@ or
 
 - docker-compose up --build
 
-Test login works `curl --location --request POST 'localhost:1323/login' \ --header 'Content-Type: application/json' \ --data-raw '{ "username": "george", "password": "testtest" }'`
+Test login works `curl --location --request POST 'localhost:1323/api/login' \ --header 'Content-Type: application/json' \ --data-raw '{ "username": "george", "password": "testtest" }'`
 
 ## Benchmarks
 
 Quite fast at 17K transactions per second wondering if the benchmarking strategy is wrong...
 
 ```console
-siege -c512 -t15s --content-type "application/json" 'http://localhost:1323/login POST {"username": "paul", "password": "testtest"}'
+siege -c512 -t15s --content-type "application/json" 'http://localhost:1323/api/login POST {"username": "paul", "password": "testtest"}'
 ** SIEGE 4.0.4
 ** Preparing 512 concurrent users for battle.
 The server is now under siege...
