@@ -15,25 +15,25 @@ Test login works `curl --location --request POST 'localhost:1323/api/login' \ --
 
 ## Benchmarks
 
-Quite fast at 17K transactions per second wondering if the benchmarking strategy is wrong...
+Quite fast at 16K transactions per second (AMD64 8C/16T | 16GB | SATA SSD)
 
 ```console
-siege -c512 -t15s --content-type "application/json" 'http://localhost:1323/api/login POST {"username": "paul", "password": "testtest"}'
+siege -c512 -r 500 --content-type "application/json" 'http://localhost:1323/api/login POST {"username": "paul", "password": "testtest"}'
 ** SIEGE 4.0.4
 ** Preparing 512 concurrent users for battle.
 The server is now under siege...
 Lifting the server siege...
-Transactions:                244092 hits
+Transactions:                256000 hits
 Availability:                100.00 %
-Elapsed time:                 14.10 secs
-Data transferred:             9.78 MB
-Response time:                0.03 secs
-Transaction rate:         17311.49 trans/sec
-Throughput:                   0.69 MB/sec
-Concurrency:                  508.69
-Successful transactions:      244092
-Failed transactions:               0
-Longest transaction:            0.27
-Shortest transaction:           0.00
+Elapsed time:                 15.93 secs
+Data transferred:             94.73 MB
+Response time:                 0.03 secs
+Transaction rate:          16070.31 trans/sec
+Throughput:                    5.95 MB/sec
+Concurrency:                 495.42
+Successful transactions:     256000
+Failed transactions:              0
+Longest transaction:           0.53
+Shortest transaction:          0.00
 
 ```
