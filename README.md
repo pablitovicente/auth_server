@@ -11,29 +11,58 @@ or
 
 - docker-compose up --build
 
-Test login works `curl --location --request POST 'localhost:1323/login' \ --header 'Content-Type: application/json' \ --data-raw '{ "username": "george", "password": "testtest" }'`
+Test login works `curl --location --request POST 'localhost:1323/api/login' \ --header 'Content-Type: application/json' \ --data-raw '{ "username": "george", "password": "testtest" }'`
 
 ## Benchmarks
 
-Quite fast at 17K transactions per second wondering if the benchmarking strategy is wrong...
+Hardware: AMD64 8C/16T | 16GB | SATA SSD
+Test setup: 512 concurrent clients, 500 repetitions.
+
+### Login
+
+Quite fast at 16K transactions per second.
 
 ```console
-siege -c512 -t15s --content-type "application/json" 'http://localhost:1323/login POST {"username": "paul", "password": "testtest"}'
+siege -c512 -r 500 --content-type "application/json" 'http://localhost:1323/api/login POST {"username": "paul", "password": "testtest"}'
 ** SIEGE 4.0.4
 ** Preparing 512 concurrent users for battle.
 The server is now under siege...
 Lifting the server siege...
-Transactions:                244092 hits
+Transactions:                256000 hits
 Availability:                100.00 %
-Elapsed time:                 14.10 secs
-Data transferred:             9.78 MB
-Response time:                0.03 secs
-Transaction rate:         17311.49 trans/sec
-Throughput:                   0.69 MB/sec
-Concurrency:                  508.69
-Successful transactions:      244092
-Failed transactions:               0
-Longest transaction:            0.27
-Shortest transaction:           0.00
+Elapsed time:                 15.93 secs
+Data transferred:             94.73 MB
+Response time:                 0.03 secs
+Transaction rate:          16070.31 trans/sec
+Throughput:                    5.95 MB/sec
+Concurrency:                 495.42
+Successful transactions:     256000
+Failed transactions:              0
+Longest transaction:           0.53
+Shortest transaction:          0.00
+```
+
+### Access JWT protected route
+
+Quite fast at 18.2K transactions per second. Longuest request up to a second but considering that both server and benchmark are running on same machine still good.
+
+```console
+siege -c512 -r 500 --header="Authorization:Basic <obtain token with example login request>" 'http://localhost:1323/api/test
+** SIEGE 4.0.4
+** Preparing 512 concurrent users for battle.
+The server is now under siege...
+Lifting the server siege...
+Transactions:                256000 hits
+Availability:                100.00 %
+Elapsed time:                 14.00 secs
+Data transferred:              9.52 MB
+Response time:                 0.03 secs
+Transaction rate:          18285.71 trans/sec
+Throughput:                    0.68 MB/sec
+Concurrency:                 480.23
+Successful transactions:          0
+Failed transactions:              0
+Longest transaction:           1.01
+Shortest transaction:          0.00
 
 ```

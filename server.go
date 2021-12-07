@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
@@ -32,7 +33,7 @@ func main() {
 	// calls to e.Logger.<Debug, Infor, etc.>
 	e.Logger.SetLevel(log.OFF)
 
-	e.POST("/login", func(c echo.Context) error {
+	e.POST("/api/login", func(c echo.Context) error {
 		// Create an empty struct
 		credentials := new(login.Credentials)
 		// Try to get data from request
@@ -47,6 +48,28 @@ func main() {
 			return c.JSON(http.StatusOK, dbUser)
 		}
 		return c.JSON(http.StatusUnauthorized, "Invalid username or password!")
+	})
+
+	// Echo Group of JWT protected routes
+	// Restricted group
+	r := e.Group("/api")
+	// Configure middleware with the custom claims type
+	config := middleware.JWTConfig{
+		Claims:     &login.JwtCustomClaims{},
+		SigningKey: []byte("THIS_SECRET_SHOULD_BE_A_COMMAND_LINE_ARGUMENT_INJECTED_TO_THE_OWNER_STRUCT"),
+	}
+	r.Use(middleware.JWTWithConfig(config))
+
+	r.GET("/test", func(c echo.Context) error {
+		// Get the JWT from the Context
+		decodedJWT := c.Get("user").(*jwt.Token)
+		// Extract Claims
+		claims := decodedJWT.Claims.(*login.JwtCustomClaims)
+		// Use one of the claims as example
+		name := claims.User.Username
+		group := claims.User.GroupName
+
+		return c.JSON(http.StatusOK, "Welcome "+name+" from "+group)
 	})
 
 	// Start server
