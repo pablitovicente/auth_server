@@ -28,11 +28,12 @@ type jwtCustomClaims struct {
 // 	Password: login.Password,
 // 	isAdmin:  false,
 // }
-type sanitizedLogin struct {
-	Username string
-	Password string
-	isAdmin  bool
-}
+// Commenting out for now
+// type sanitizedLogin struct {
+// 	Username string
+// 	Password string
+// 	isAdmin  bool
+// }
 
 func (c *Credentials) Execute(dbp *pgxpool.Pool) (bool, db.User) {
 	sql := "SELECT u.id, username, g.id AS gId, g.name, g.description FROM users u INNER JOIN groups g ON u.groupid = g.id WHERE username = $1 AND password = $2"

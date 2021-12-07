@@ -3,13 +3,13 @@ module github.com/pablitovicente/auth_server
 go 1.17
 
 require (
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/jackc/pgx/v4 v4.14.1
 	github.com/labstack/echo/v4 v4.6.1
 	github.com/labstack/gommon v0.3.1
 )
 
 require (
-	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.10.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect

@@ -16,9 +16,10 @@ type Pool struct {
 }
 
 type User struct {
-	Id               int
-	Username         string
-	password         string
+	Id       int
+	Username string
+	// Might use this later...
+	// password         string
 	GroupId          int
 	GroupName        string
 	GroupDescription string
