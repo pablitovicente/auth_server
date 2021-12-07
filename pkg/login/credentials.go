@@ -38,6 +38,7 @@ type jwtCustomClaims struct {
 func (c *Credentials) Execute(dbp *pgxpool.Pool) (bool, db.User) {
 	sql := "SELECT u.id, username, g.id AS gId, g.name, g.description FROM users u INNER JOIN groups g ON u.groupid = g.id WHERE username = $1 AND password = $2"
 	row, err := dbp.Query(context.Background(), sql, c.Username, c.Password)
+	var found db.User
 
 	if err != nil {
 		log.Error("Failed to query DB:", err)
@@ -50,11 +51,9 @@ func (c *Credentials) Execute(dbp *pgxpool.Pool) (bool, db.User) {
 
 	if !row.Next() {
 		log.Error("Login failed")
-		emptyUser := db.User{}
-		return false, emptyUser
+		return false, found
 	}
 
-	var found db.User
 	err = row.Scan(&found.Id, &found.Username, &found.GroupId, &found.GroupName, &found.GroupDescription)
 	if err != nil {
 		log.Error("Error parsing authenticated user:", err)
@@ -76,8 +75,7 @@ func (c *Credentials) Execute(dbp *pgxpool.Pool) (bool, db.User) {
 	found.JWT = t
 
 	if err != nil {
-		emptyUser := db.User{}
-		return false, emptyUser
+		return false, found
 	}
 
 	return true, found
