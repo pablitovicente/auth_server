@@ -23,7 +23,7 @@ Test setup: 512 concurrent clients, 500 repetitions.
 Quite fast at 16K transactions per second.
 
 ```console
-siege -c512 -r 500 --content-type "application/json" 'http://localhost:1323/api/login POST {"username": "paul", "password": "testtest"}'
+siege -c512 -r 500 --content-type "application/json" 'http://localhost:3000/api/login POST {"username": "paul", "password": "testtest"}'
 ** SIEGE 4.0.4
 ** Preparing 512 concurrent users for battle.
 The server is now under siege...
@@ -47,7 +47,7 @@ Shortest transaction:          0.00
 Quite fast at 18.2K transactions per second. Longuest request up to a second but considering that both server and benchmark are running on same machine still good.
 
 ```console
-siege -c512 -r 500 --header="Authorization:Basic <obtain token with example login request>" 'http://localhost:1323/api/test
+siege -c512 -r 500 --header="Authorization:Basic <obtain token with example login request>" 'http://localhost:3000/api/test
 ** SIEGE 4.0.4
 ** Preparing 512 concurrent users for battle.
 The server is now under siege...

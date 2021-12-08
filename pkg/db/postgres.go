@@ -29,7 +29,7 @@ type User struct {
 func (dbp *Pool) Connect() {
 	// HACK to wait for PG for quick POC
 	// this should be a propper reconnection strategy
-	time.Sleep(5 * time.Second)
+	time.Sleep(4 * time.Second)
 	fmt.Println("going to attempt db connection....")
 	// Setup DB Connection Pool
 	dbpool, err := pgxpool.Connect(context.Background(), dbp.ConnString)
