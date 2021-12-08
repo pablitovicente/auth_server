@@ -1,10 +1,16 @@
 {
   "jwtSecret": "this-is-what-you-get-when-you",
+  "http": {
+    "port": 3000,
+    "caFile": "/some/path/ca",
+    "certFile": "/some/path/cert",
+    "certKey": "/some/path/key"
+  },
   "db": {
     "username": "test",
     "password": "test1234",
     "host": "db",
     "name": "auth_server",
-    "port": "5432"
+    "port": 5432
   }
 }

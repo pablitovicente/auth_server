@@ -14,13 +14,17 @@ import (
 )
 
 func main() {
+	// Configs
 	config.SetConfigType("json")
 	config.SetConfigName("config")
 	config.AddConfigPath("./")
+
 	err := config.ReadInConfig()
 	if err != nil {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
+
+	httpPort := config.GetString("http.port")
 
 	// DB connection and seed
 	db := db.Pool{
@@ -84,5 +88,5 @@ func main() {
 	})
 
 	// Start server
-	e.Logger.Fatal(e.Start(":1323"))
+	e.Logger.Fatal(e.Start(":" + httpPort))
 }

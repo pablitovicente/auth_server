@@ -5,7 +5,7 @@ services:
     build: .
     # image: auth_server:v1
     ports:
-      - 1323:1323
+      - 3000:3000
     depends_on:
       - db
   db:

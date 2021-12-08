@@ -20,6 +20,6 @@ WORKDIR /app
 COPY --from=builder /auth_server /app/auth_server
 COPY /config.json /app/config.json
 
-EXPOSE 1323
+EXPOSE 3000
 
 ENTRYPOINT ["/app/auth_server"]
