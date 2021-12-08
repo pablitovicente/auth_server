@@ -15,10 +15,11 @@ RUN export CGO_ENABLED=0 && go build -o /auth_server
 ## Deploy
 FROM alpine:latest
 
-WORKDIR /
+WORKDIR /app
 
-COPY --from=builder /auth_server /auth_server
+COPY --from=builder /auth_server /app/auth_server
+COPY /config.json /app/config.json
 
 EXPOSE 1323
 
-ENTRYPOINT ["/auth_server"]
+ENTRYPOINT ["/app/auth_server"]

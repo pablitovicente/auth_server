@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/golang-jwt/jwt"
@@ -9,11 +10,21 @@ import (
 	"github.com/labstack/gommon/log"
 	"github.com/pablitovicente/auth_server/pkg/db"
 	"github.com/pablitovicente/auth_server/pkg/login"
+	config "github.com/spf13/viper"
 )
 
 func main() {
+	config.SetConfigType("json")
+	config.SetConfigName("config")
+	config.AddConfigPath("./")
+	err := config.ReadInConfig()
+	if err != nil {
+		panic(fmt.Errorf("fatal error config file: %w", err))
+	}
+
+	// DB connection and seed
 	db := db.Pool{
-		ConnString: "postgres://test:test1234@db:5432/auth_server",
+		ConnString: "postgres://" + config.GetString("db.username") + ":" + config.GetString("db.password") + "@" + config.GetString("db.host") + ":" + config.GetString("db.port") + "/" + config.GetString("db.name"),
 	}
 
 	db.Connect()

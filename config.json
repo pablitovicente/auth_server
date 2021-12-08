@@ -1,0 +1,10 @@
+{
+  "jwtSecret": "this-is-what-you-get-when-you",
+  "db": {
+    "username": "test",
+    "password": "test1234",
+    "host": "db",
+    "name": "auth_server",
+    "port": "5432"
+  }
+}
