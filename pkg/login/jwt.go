@@ -27,6 +27,7 @@ func (j JWT) Generate(user *db.User) (string, error) {
 		*user,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * time.Duration(j.ExpirationHours)).Unix(),
+			IssuedAt:  time.Now().Unix(),
 		},
 	}
 
