@@ -60,7 +60,7 @@ func (db *Pool) SeedDB() {
 	}
 
 	// Insert some rows into groups
-	sql = "INSERT INTO groups (id, name, enabled, description) VALUES (1963, 'The Beatles', 1, 'Greatest band ever'), (1993, 'Radiohead', 1, 'Greates alternative rock band ever')"
+	sql = "INSERT INTO groups (id, name, enabled, description) VALUES (1963, 'The Beatles', 1, 'Greatest band ever'), (1993, 'Radiohead', 1, 'Greatest alternative rock band ever')"
 	if _, err := db.Pool.Exec(context.Background(), sql); err != nil {
 		log.Fatal(err)
 	}

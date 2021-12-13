@@ -34,6 +34,11 @@ func main() {
 	db.Connect()
 	defer db.Pool.Close()
 	db.SeedDB()
+	// JWT Configuration
+	jwto := login.JWT{
+		Key:             config.GetString("jwt.secret"),
+		ExpirationHours: config.GetInt("jwt.expirationHours"),
+	}
 
 	// Echo instance
 	e := echo.New()
@@ -55,12 +60,16 @@ func main() {
 		if err := c.Bind(credentials); err != nil {
 			return err
 		}
-		// Pass key
-		credentials.JWTKey = config.GetString("jwtSecret")
 		// Validate the login
 		loginOk, dbUser := credentials.Validate(db.Pool)
 
 		if loginOk {
+			signedToken, err := jwto.Generate(dbUser)
+			if err != nil {
+				return c.JSON(http.StatusUnauthorized, "Error generating token")
+			}
+			dbUser.JWT = signedToken
+
 			c.Response().Header().Set("Authorization", "Bearer "+dbUser.JWT)
 			return c.JSON(http.StatusOK, dbUser)
 		}
@@ -72,7 +81,7 @@ func main() {
 	// Configure middleware with the custom claims type
 	config := middleware.JWTConfig{
 		Claims:                  &login.JwtCustomClaims{},
-		SigningKey:              []byte(config.GetString("jwtSecret")),
+		SigningKey:              []byte(jwto.Key),
 		ErrorHandlerWithContext: jwtError,
 	}
 	// Attach JWT middleware to route group

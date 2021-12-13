@@ -2,7 +2,6 @@ package login
 
 import (
 	"context"
-	"time"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -13,7 +12,6 @@ import (
 type Credentials struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
-	JWTKey   string
 }
 
 type JwtCustomClaims struct {
@@ -59,21 +57,6 @@ func (c *Credentials) Validate(dbp *pgxpool.Pool) (bool, db.User) {
 	if err != nil {
 		log.Error("Error parsing authenticated user:", err)
 	}
-
-	// Set custom claims
-	claims := &JwtCustomClaims{
-		found,
-		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
-		},
-	}
-
-	// Create token with claims
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	// Generate encoded token and send it as response.
-	t, err := token.SignedString([]byte(c.JWTKey))
-	found.JWT = t
 
 	if err != nil {
 		return false, found
