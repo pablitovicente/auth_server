@@ -55,8 +55,10 @@ func main() {
 		if err := c.Bind(credentials); err != nil {
 			return err
 		}
-		// Execute the login
-		loginOk, dbUser := credentials.Execute(db.Pool)
+		// Pass key
+		credentials.JWTKey = config.GetString("jwtSecret")
+		// Validate the login
+		loginOk, dbUser := credentials.Validate(db.Pool)
 
 		if loginOk {
 			c.Response().Header().Set("Authorization", "Bearer "+dbUser.JWT)
@@ -66,13 +68,14 @@ func main() {
 	})
 
 	// Echo Group of JWT protected routes
-	// Restricted group
 	r := e.Group("/api")
 	// Configure middleware with the custom claims type
 	config := middleware.JWTConfig{
-		Claims:     &login.JwtCustomClaims{},
-		SigningKey: []byte("THIS_SECRET_SHOULD_BE_A_COMMAND_LINE_ARGUMENT_INJECTED_TO_THE_OWNER_STRUCT"),
+		Claims:                  &login.JwtCustomClaims{},
+		SigningKey:              []byte(config.GetString("jwtSecret")),
+		ErrorHandlerWithContext: jwtError,
 	}
+	// Attach JWT middleware to route group
 	r.Use(middleware.JWTWithConfig(config))
 
 	r.GET("/test", func(c echo.Context) error {
@@ -89,4 +92,9 @@ func main() {
 
 	// Start server
 	e.Logger.Fatal(e.Start(":" + httpPort))
+}
+
+// JWT custom error handler
+func jwtError(err error, c echo.Context) error {
+	return c.JSON(http.StatusUnauthorized, "JWT validation error: "+err.Error())
 }

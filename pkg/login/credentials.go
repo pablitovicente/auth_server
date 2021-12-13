@@ -13,6 +13,7 @@ import (
 type Credentials struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
+	JWTKey   string
 }
 
 type JwtCustomClaims struct {
@@ -34,8 +35,8 @@ type JwtCustomClaims struct {
 // 	Password string
 // 	isAdmin  bool
 // }
-
-func (c *Credentials) Execute(dbp *pgxpool.Pool) (bool, db.User) {
+// @TODO generate random keys for JWT signing for each login
+func (c *Credentials) Validate(dbp *pgxpool.Pool) (bool, db.User) {
 	sql := "SELECT u.id, username, g.id AS gId, g.name, g.description FROM users u INNER JOIN groups g ON u.groupid = g.id WHERE username = $1 AND password = $2"
 	row, err := dbp.Query(context.Background(), sql, c.Username, c.Password)
 	var found db.User
@@ -71,7 +72,7 @@ func (c *Credentials) Execute(dbp *pgxpool.Pool) (bool, db.User) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// Generate encoded token and send it as response.
-	t, err := token.SignedString([]byte("THIS_SECRET_SHOULD_BE_A_COMMAND_LINE_ARGUMENT_INJECTED_TO_THE_OWNER_STRUCT"))
+	t, err := token.SignedString([]byte(c.JWTKey))
 	found.JWT = t
 
 	if err != nil {
