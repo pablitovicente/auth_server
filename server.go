@@ -53,28 +53,9 @@ func main() {
 	// calls to e.Logger.<Debug, Infor, etc.>
 	e.Logger.SetLevel(log.OFF)
 
-	e.POST("/api/login", func(c echo.Context) error {
-		// Create an empty struct
-		credentials := new(login.Credentials)
-		// Try to get data from request
-		if err := c.Bind(credentials); err != nil {
-			return err
-		}
-		// Validate the login
-		loginOk, dbUser := credentials.Validate(db.Pool)
-
-		if loginOk {
-			signedToken, err := jwto.Generate(&dbUser)
-			if err != nil {
-				return c.JSON(http.StatusUnauthorized, "Error generating token")
-			}
-			dbUser.JWT = signedToken
-
-			c.Response().Header().Set("Authorization", "Bearer "+dbUser.JWT)
-			return c.JSON(http.StatusOK, dbUser)
-		}
-		return c.JSON(http.StatusUnauthorized, "Invalid username or password!")
-	})
+	login.DBPool = &db
+	login.J = &jwto
+	e.POST("/api/login", login.Handler())
 
 	// Echo Group of JWT protected routes
 	r := e.Group("/api")
