@@ -47,7 +47,7 @@ Shortest transaction:          0.00
 Quite fast at 18.2K transactions per second. Longuest request up to a second but considering that both server and benchmark are running on same machine still good.
 
 ```console
-siege -c512 -r 500 --header="Authorization:Basic <obtain token with example login request>" 'http://localhost:3000/api/test
+siege -c512 -r 500 --header="Authorization:Bearer <obtain token with example login request>" 'http://localhost:3000/api/test
 ** SIEGE 4.0.4
 ** Preparing 512 concurrent users for battle.
 The server is now under siege...
@@ -57,12 +57,12 @@ Availability:                100.00 %
 Elapsed time:                 14.00 secs
 Data transferred:              9.52 MB
 Response time:                 0.03 secs
-Transaction rate:          18285.71 trans/sec
+Transaction rate:          17135.21 trans/sec
 Throughput:                    0.68 MB/sec
 Concurrency:                 480.23
-Successful transactions:          0
+Successful transactions:     256000
 Failed transactions:              0
-Longest transaction:           1.01
+Longest transaction:           0.61
 Shortest transaction:          0.00
 
 ```
