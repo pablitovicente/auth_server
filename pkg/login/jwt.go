@@ -12,14 +12,19 @@ type JWT struct {
 	ExpirationHours int
 }
 
-func (j JWT) Generate(user db.User) (string, error) {
+type JwtCustomClaims struct {
+	User db.User
+	jwt.StandardClaims
+}
+
+func (j JWT) Generate(user *db.User) (string, error) {
 	// Perhaps better handling would be better
 	if j.Key == "" {
 		panic("JWT signing key is empty not safe to continue")
 	}
 	// Set custom claims
 	claims := &JwtCustomClaims{
-		user,
+		*user,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * time.Duration(j.ExpirationHours)).Unix(),
 		},

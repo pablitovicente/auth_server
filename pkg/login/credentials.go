@@ -3,7 +3,6 @@ package login
 import (
 	"context"
 
-	"github.com/golang-jwt/jwt"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/labstack/gommon/log"
 	"github.com/pablitovicente/auth_server/pkg/db"
@@ -12,11 +11,6 @@ import (
 type Credentials struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
-}
-
-type JwtCustomClaims struct {
-	User db.User
-	jwt.StandardClaims
 }
 
 // For security remap fields (for example imagine the target struct

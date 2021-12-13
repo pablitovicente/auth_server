@@ -64,7 +64,7 @@ func main() {
 		loginOk, dbUser := credentials.Validate(db.Pool)
 
 		if loginOk {
-			signedToken, err := jwto.Generate(dbUser)
+			signedToken, err := jwto.Generate(&dbUser)
 			if err != nil {
 				return c.JSON(http.StatusUnauthorized, "Error generating token")
 			}
