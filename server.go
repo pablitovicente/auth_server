@@ -70,5 +70,9 @@ func main() {
 
 // JWT custom error handler
 func jwtError(err error, c echo.Context) error {
-	return c.JSON(http.StatusUnauthorized, "JWT validation error: "+err.Error())
+	if err == middleware.ErrJWTMissing {
+		return c.JSON(http.StatusForbidden, "Missing JWT")
+	}
+
+	return c.JSON(http.StatusUnauthorized, "JWT error: "+err.Error())
 }
