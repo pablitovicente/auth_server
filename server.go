@@ -55,7 +55,7 @@ func main() {
 
 	login.DBPool = &db
 	login.J = &jwto
-	e.POST("/api/login", login.Handler())
+	e.POST("/api/login", login.Handler)
 
 	// Echo Group of JWT protected routes
 	r := e.Group("/api")
