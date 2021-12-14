@@ -1,43 +1,33 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
+	"github.com/pablitovicente/auth_server/pkg/config"
 	"github.com/pablitovicente/auth_server/pkg/db"
 	"github.com/pablitovicente/auth_server/pkg/login"
-	config "github.com/spf13/viper"
 )
 
 func main() {
-	// Configs
-	config.SetConfigType("json")
-	config.SetConfigName("config")
-	config.AddConfigPath("./")
-
-	err := config.ReadInConfig()
-	if err != nil {
-		panic(fmt.Errorf("fatal error config file: %w", err))
-	}
-
-	httpPort := config.GetString("http.port")
-
+	// Bootstrap configuration
+	cfg := config.Bootstrap(".")
 	// DB connection and seed
 	db := db.Pool{
-		ConnString: "postgres://" + config.GetString("db.username") + ":" + config.GetString("db.password") + "@" + config.GetString("db.host") + ":" + config.GetString("db.port") + "/" + config.GetString("db.name"),
+		ConnString: "postgres://" + cfg.GetString("db.username") + ":" + cfg.GetString("db.password") + "@" + cfg.GetString("db.host") + ":" + cfg.GetString("db.port") + "/" + cfg.GetString("db.name"),
 	}
 
 	db.Connect()
 	defer db.Pool.Close()
 	db.SeedDB()
+
 	// JWT Configuration
 	jwto := login.JWT{
-		Key:             config.GetString("jwt.secret"),
-		ExpirationHours: config.GetInt("jwt.expirationHours"),
+		Key:             cfg.GetString("jwt.secret"),
+		ExpirationHours: cfg.GetInt("jwt.expirationHours"),
 	}
 
 	// Echo instance
@@ -81,7 +71,7 @@ func main() {
 	})
 
 	// Start server
-	e.Logger.Fatal(e.Start(":" + httpPort))
+	e.Logger.Fatal(e.Start(":" + cfg.GetString("http.port")))
 }
 
 // JWT custom error handler
