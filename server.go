@@ -24,12 +24,18 @@ func main() {
 	defer db.Pool.Close()
 	db.SeedDB()
 
-	// JWT Configuration
+	// JWT Object
 	jwto := login.JWT{
-		Key:             cfg.GetString("jwt.secret"),
 		ExpirationHours: cfg.GetInt("jwt.expirationHours"),
+		MiddleWareConfig: middleware.JWTConfig{
+			Claims:                  &login.JwtCustomClaims{},
+			SigningKey:              []byte(cfg.GetString("jwt.secret")),
+			ErrorHandlerWithContext: jwtError,
+		},
 	}
-
+	// Need to find idiomatic way of sharing this...
+	login.DBPool = &db
+	login.J = &jwto
 	// Echo instance
 	e := echo.New()
 	e.HideBanner = true
@@ -43,31 +49,19 @@ func main() {
 	// calls to e.Logger.<Debug, Infor, etc.>
 	e.Logger.SetLevel(log.OFF)
 
-	login.DBPool = &db
-	login.J = &jwto
-	e.POST("/api/login", login.Handler)
-
 	// Echo Group of JWT protected routes
 	r := e.Group("/api")
-	// Configure middleware with the custom claims type
-	config := middleware.JWTConfig{
-		Claims:                  &login.JwtCustomClaims{},
-		SigningKey:              []byte(jwto.Key),
-		ErrorHandlerWithContext: jwtError,
-	}
-	// Attach JWT middleware to route group
-	r.Use(middleware.JWTWithConfig(config))
+	// Attach JWT middleware just to this route group
+	r.Use(middleware.JWTWithConfig(jwto.MiddleWareConfig))
+
+	// Routes
+	e.POST("/api/login", login.Handler)
 
 	r.GET("/test", func(c echo.Context) error {
 		// Get the JWT from the Context
-		decodedJWT := c.Get("user").(*jwt.Token)
-		// Extract Claims
-		claims := decodedJWT.Claims.(*login.JwtCustomClaims)
+		permissions := jwto.Decode(c.Get("user").(*jwt.Token))
 		// Use one of the claims as example
-		name := claims.User.Username
-		group := claims.User.GroupName
-
-		return c.JSON(http.StatusOK, "Welcome "+name+" from "+group)
+		return c.JSON(http.StatusOK, "Welcome "+permissions.User.Username+" from "+permissions.User.GroupName)
 	})
 
 	// Start server
