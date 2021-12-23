@@ -9,6 +9,7 @@ RUN go mod download
 
 COPY *.go ./
 COPY pkg ./pkg
+COPY certs ./certs
 
 RUN export CGO_ENABLED=0 && go build -o /auth_server
 
@@ -19,6 +20,7 @@ WORKDIR /app
 
 COPY --from=builder /auth_server /app/auth_server
 COPY /config.json /app/config.json
+COPY /certs /app/certs
 
 EXPOSE 3000
 

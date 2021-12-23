@@ -65,5 +65,11 @@ func main() {
 	})
 
 	// Start server
-	e.Logger.Fatal(e.Start(":" + cfg.GetString("http.port")))
+	if cfg.GetBool("http.sslEnabled") {
+		if err := e.StartTLS(":3000", cfg.GetString("http.certFile"), cfg.GetString("http.certKey")); err != http.ErrServerClosed {
+			log.Fatal(err)
+		}
+	} else {
+		e.Logger.Fatal(e.Start(":" + cfg.GetString("http.port")))
+	}
 }

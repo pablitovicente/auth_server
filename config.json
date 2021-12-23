@@ -6,8 +6,9 @@
   "http": {
     "port": 3000,
     "caFile": "/some/path/ca",
-    "certFile": "/some/path/cert",
-    "certKey": "/some/path/key"
+    "certFile": "./certs/server.crt",
+    "certKey": "./certs/server.key",
+    "sslEnabled": true
   },
   "db": {
     "username": "test",
