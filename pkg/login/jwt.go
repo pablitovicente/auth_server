@@ -1,9 +1,11 @@
 package login
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/pablitovicente/auth_server/pkg/db"
 )
@@ -46,4 +48,13 @@ func (j JWT) Generate(user *db.User) (string, error) {
 func (j JWT) Decode(token *jwt.Token) JwtCustomClaims {
 	claims := token.Claims.(*JwtCustomClaims)
 	return *claims
+}
+
+// JWT custom error handler
+func JWTError(err error, c echo.Context) error {
+	if err == middleware.ErrJWTMissing {
+		return c.JSON(http.StatusForbidden, "Missing JWT")
+	}
+
+	return c.JSON(http.StatusUnauthorized, "JWT error: "+err.Error())
 }

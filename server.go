@@ -30,7 +30,7 @@ func main() {
 		MiddleWareConfig: middleware.JWTConfig{
 			Claims:                  &login.JwtCustomClaims{},
 			SigningKey:              []byte(cfg.GetString("jwt.secret")),
-			ErrorHandlerWithContext: jwtError,
+			ErrorHandlerWithContext: login.JWTError,
 		},
 	}
 	// Need to find idiomatic way of sharing this...
@@ -66,13 +66,4 @@ func main() {
 
 	// Start server
 	e.Logger.Fatal(e.Start(":" + cfg.GetString("http.port")))
-}
-
-// JWT custom error handler
-func jwtError(err error, c echo.Context) error {
-	if err == middleware.ErrJWTMissing {
-		return c.JSON(http.StatusForbidden, "Missing JWT")
-	}
-
-	return c.JSON(http.StatusUnauthorized, "JWT error: "+err.Error())
 }

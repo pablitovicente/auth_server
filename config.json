@@ -1,6 +1,6 @@
 {
   "jwt": {
-    "secret": "this-is-what-you-get-when-you",
+    "secret": "Y3AkifysZTTbJKlmUA0OHtPYDkDXKuI8PGF5Sy-dNqg",
     "expirationHours": 2
   },
   "http": {
