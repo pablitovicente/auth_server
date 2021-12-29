@@ -1,6 +1,6 @@
 {
   "jwt": {
-    "secret": "Y3AkifysZTTbJKlmUA0OHtPYDkDXKuI8PGF5Sy-dNqg",
+    "secret": "Y3AkifysZTTbJKlmUA0OHtPYDkDXKBI8PFF5Sy2dNqgx31",
     "expirationHours": 2
   },
   "http": {
@@ -8,7 +8,7 @@
     "caFile": "/some/path/ca",
     "certFile": "./certs/server.crt",
     "certKey": "./certs/server.key",
-    "sslEnabled": true
+    "sslEnabled": false
   },
   "db": {
     "username": "test",
