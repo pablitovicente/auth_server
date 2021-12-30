@@ -7,6 +7,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/georgysavva/scany/pgxscan"
+	"github.com/jackc/pgconn"
+	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -41,6 +44,50 @@ func (dbp *Pool) Connect() {
 	dbp.Pool = dbpool
 }
 
+func (dbp *Pool) GetConnection() (conn *pgxpool.Conn, err error) {
+	return dbp.Pool.Acquire(context.TODO())
+}
+
+func (dbp *Pool) NewTx(conn *pgxpool.Conn) (tx pgx.Tx, err error) {
+	return conn.BeginTx(context.TODO(), pgx.TxOptions{})
+}
+
+func (dbp *Pool) CommitOrRollback(tx pgx.Tx, err *error) (er error) {
+	if *err != nil {
+		er = tx.Rollback(context.TODO())
+	} else {
+		er = tx.Commit(context.TODO())
+	}
+	return
+}
+
+func (dbp *Pool) Exec(tx pgx.Tx, query string, values ...interface{}) (tag pgconn.CommandTag, err error) {
+	commandTag, err := tx.Exec(context.TODO(), query, values...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return commandTag, nil
+}
+
+// Store should be an slice of pointers to a type. For example if we have a type Foo store will be []*Foo
+func (dbp *Pool) Select(tx pgx.Tx, store interface{}, query string, values ...interface{}) (err error) {
+	var er error
+	if values == nil {
+		er = pgxscan.Select(context.Background(), dbp.Pool, store, query)
+	} else {
+		er = pgxscan.Select(context.Background(), dbp.Pool, store, query, values...)
+	}
+
+	if er != nil {
+		fmt.Println("error on pgxscan", err)
+		return er
+	}
+	return nil
+}
+
+// TODO: remove seeding and move somewhere else
 func (db *Pool) SeedDB() {
 	// Create the "users" table.
 	sql := "CREATE TABLE IF NOT EXISTS users ( id serial NOT NULL, PRIMARY KEY (id), username character varying(255) NOT NULL, password character varying(255) NOT NULL, groupid integer NOT NULL)"

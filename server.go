@@ -10,6 +10,7 @@ import (
 	"github.com/pablitovicente/auth_server/pkg/config"
 	"github.com/pablitovicente/auth_server/pkg/db"
 	"github.com/pablitovicente/auth_server/pkg/login"
+	"github.com/pablitovicente/auth_server/pkg/users"
 )
 
 func main() {
@@ -35,6 +36,7 @@ func main() {
 	}
 	// Need to find idiomatic way of sharing this...
 	login.DBPool = &db
+	users.DBPool = &db
 	login.J = &jwto
 	// Echo instance
 	e := echo.New()
@@ -63,11 +65,15 @@ func main() {
 		// Use one of the claims as example
 		return c.JSON(http.StatusOK, "Welcome "+permissions.User.Username+" from "+permissions.User.GroupName)
 	})
+	// User Routes
+	r.GET("/user/:id", users.ReadOneHandler)
+	r.GET("/user", users.ReadAllHandler)
+	r.POST("/user", users.AddHandler)
 
 	// Start server
 	if cfg.GetBool("http.sslEnabled") {
 		if err := e.StartTLS(":3000", cfg.GetString("http.certFile"), cfg.GetString("http.certKey")); err != http.ErrServerClosed {
-			log.Fatal(err)
+			e.Logger.Fatal(err)
 		}
 	} else {
 		e.Logger.Fatal(e.Start(":" + cfg.GetString("http.port")))
