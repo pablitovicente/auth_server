@@ -1,7 +1,11 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"net/http"
+
+	"github.com/jackc/pgx/v4"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
@@ -10,6 +14,7 @@ import (
 	"github.com/pablitovicente/auth_server/pkg/config"
 	"github.com/pablitovicente/auth_server/pkg/db"
 	"github.com/pablitovicente/auth_server/pkg/login"
+	"github.com/pablitovicente/auth_server/pkg/users"
 )
 
 func main() {
@@ -35,6 +40,7 @@ func main() {
 	}
 	// Need to find idiomatic way of sharing this...
 	login.DBPool = &db
+	users.DBPool = &db
 	login.J = &jwto
 	// Echo instance
 	e := echo.New()
@@ -63,11 +69,57 @@ func main() {
 		// Use one of the claims as example
 		return c.JSON(http.StatusOK, "Welcome "+permissions.User.Username+" from "+permissions.User.GroupName)
 	})
+	// TODO: move this code to a handler
+	r.GET("/user/:id", func(c echo.Context) error {
+		id := c.Param("id")
+		// Acquire connection from pool
+		conn, err := db.Pool.Acquire(context.TODO())
+		if err != nil {
+			fmt.Println("Error aquiring client from DB Pool", err)
+			return err
+		}
+		// Defer the release of the client
+		defer conn.Release()
+		// Begin transaction
+		tx, err := conn.BeginTx(context.TODO(), pgx.TxOptions{})
+		if err != nil {
+			return err
+		}
+		// Defer Commit/Rollback the way this works
+		// is that if the err variable is set the TX
+		// will be rolled back and if not it will
+		// commit it
+		defer func() {
+			if err != nil {
+				tx.Rollback(context.TODO())
+			} else {
+				tx.Commit(context.TODO())
+			}
+		}()
+
+		query := "SELECT id, username FROM users WHERE id = $1"
+		row := tx.QueryRow(context.TODO(), query, id)
+		if err != nil {
+			return err
+		}
+
+		type IdName struct {
+			Id       int
+			Username string
+		}
+
+		var myRow IdName
+
+		err = row.Scan(&myRow.Id, &myRow.Username)
+		return c.JSON(http.StatusOK, myRow)
+	})
+
+	r.POST("/user", users.AddHandler)
 
 	// Start server
 	if cfg.GetBool("http.sslEnabled") {
 		if err := e.StartTLS(":3000", cfg.GetString("http.certFile"), cfg.GetString("http.certKey")); err != http.ErrServerClosed {
-			log.Fatal(err)
+			e.Logger.Fatal(err)
 		}
 	} else {
 		e.Logger.Fatal(e.Start(":" + cfg.GetString("http.port")))
