@@ -1,11 +1,7 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"net/http"
-
-	"github.com/jackc/pgx/v4"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
@@ -69,51 +65,9 @@ func main() {
 		// Use one of the claims as example
 		return c.JSON(http.StatusOK, "Welcome "+permissions.User.Username+" from "+permissions.User.GroupName)
 	})
-	// TODO: move this code to a handler
-	r.GET("/user/:id", func(c echo.Context) error {
-		id := c.Param("id")
-		// Acquire connection from pool
-		conn, err := db.Pool.Acquire(context.TODO())
-		if err != nil {
-			fmt.Println("Error aquiring client from DB Pool", err)
-			return err
-		}
-		// Defer the release of the client
-		defer conn.Release()
-		// Begin transaction
-		tx, err := conn.BeginTx(context.TODO(), pgx.TxOptions{})
-		if err != nil {
-			return err
-		}
-		// Defer Commit/Rollback the way this works
-		// is that if the err variable is set the TX
-		// will be rolled back and if not it will
-		// commit it
-		defer func() {
-			if err != nil {
-				tx.Rollback(context.TODO())
-			} else {
-				tx.Commit(context.TODO())
-			}
-		}()
-
-		query := "SELECT id, username FROM users WHERE id = $1"
-		row := tx.QueryRow(context.TODO(), query, id)
-		if err != nil {
-			return err
-		}
-
-		type IdName struct {
-			Id       int
-			Username string
-		}
-
-		var myRow IdName
-
-		err = row.Scan(&myRow.Id, &myRow.Username)
-		return c.JSON(http.StatusOK, myRow)
-	})
-
+	// User Routes
+	r.GET("/user/:id", users.ReadOneHandler)
+	r.GET("/user", users.ReadAllHandler)
 	r.POST("/user", users.AddHandler)
 
 	// Start server

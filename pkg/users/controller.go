@@ -12,6 +12,7 @@ import (
 var DBPool *db.Pool
 
 type User struct {
+	Id       int
 	Username string `json:"name"`
 	Password string `json:"password"`
 	Groupid  int    `json:"group"`
@@ -50,4 +51,25 @@ func AddHandler(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, commandTag.RowsAffected())
+}
+
+func ReadOneHandler(c echo.Context) error {
+	id := c.Param("id")
+	// Create an slice of User for Select to store into
+	var users []*User
+	// Get result
+	DBPool.Select(nil, &users, "SELECT * FROM USERS WHERE id = $1", id)
+
+	return c.JSON(http.StatusOK, users)
+}
+
+// TODO: add pagination and configuration for pagination
+// or change to chunk transfer encoding and use pgxscan rowscaner
+func ReadAllHandler(c echo.Context) error {
+	// Create an slice of User for Select to store into
+	var users []*User
+	// Get result
+	DBPool.Select(nil, &users, "SELECT * FROM USERS")
+
+	return c.JSON(http.StatusOK, users)
 }

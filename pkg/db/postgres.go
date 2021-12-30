@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -68,6 +69,22 @@ func (dbp *Pool) Exec(tx pgx.Tx, query string, values ...interface{}) (tag pgcon
 	}
 
 	return commandTag, nil
+}
+
+// Store should be an slice of pointers to a type. For example if we have a type Foo store will be []*Foo
+func (dbp *Pool) Select(tx pgx.Tx, store interface{}, query string, values ...interface{}) (err error) {
+	var er error
+	if values == nil {
+		er = pgxscan.Select(context.Background(), dbp.Pool, store, query)
+	} else {
+		er = pgxscan.Select(context.Background(), dbp.Pool, store, query, values...)
+	}
+
+	if er != nil {
+		fmt.Println("error on pgxscan", err)
+		return er
+	}
+	return nil
 }
 
 // TODO: remove seeding and move somewhere else
