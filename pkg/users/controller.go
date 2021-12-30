@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/pablitovicente/auth_server/pkg/db"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // This package scoped globals don't look nice
@@ -25,6 +26,12 @@ func AddHandler(c echo.Context) error {
 	if err := c.Bind(user); err != nil {
 		return err
 	}
+	// Hash the password
+	err := HashPassword(user)
+	if err != nil {
+		return err
+	}
+
 	// Acquire connection from pool
 	conn, err := DBPool.GetConnection()
 	if err != nil {
@@ -58,7 +65,7 @@ func ReadOneHandler(c echo.Context) error {
 	// Create an slice of User for Select to store into
 	var users []*User
 	// Get result
-	DBPool.Select(nil, &users, "SELECT * FROM USERS WHERE id = $1", id)
+	DBPool.Select(nil, &users, "SELECT * FROM users WHERE id = $1", id)
 
 	return c.JSON(http.StatusOK, users)
 }
@@ -69,7 +76,13 @@ func ReadAllHandler(c echo.Context) error {
 	// Create an slice of User for Select to store into
 	var users []*User
 	// Get result
-	DBPool.Select(nil, &users, "SELECT * FROM USERS")
+	DBPool.Select(nil, &users, "SELECT * FROM users")
 
 	return c.JSON(http.StatusOK, users)
+}
+
+func HashPassword(user *User) (err error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.MinCost)
+	user.Password = string(bytes)
+	return err
 }

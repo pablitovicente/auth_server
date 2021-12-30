@@ -19,10 +19,8 @@ type Pool struct {
 }
 
 type User struct {
-	Id       int
-	Username string
-	// Might use this later...
-	// password         string
+	Id               int
+	Username         string
 	GroupId          int
 	GroupName        string
 	GroupDescription string
@@ -81,7 +79,8 @@ func (dbp *Pool) Select(tx pgx.Tx, store interface{}, query string, values ...in
 	}
 
 	if er != nil {
-		fmt.Println("error on pgxscan", err)
+		// TODO: replace this fmt.print with better logging
+		fmt.Println("error on pgxscan", er)
 		return er
 	}
 	return nil
